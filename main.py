@@ -8,18 +8,19 @@ from scipy.linalg import sqrtm
 from tensorflow.keras.applications.inception_v3 import InceptionV3
 from tensorflow.keras.applications.inception_v3 import preprocess_input
 from tensorflow.keras.datasets.mnist import load_data
-from skimage.transform import resize
+#from skimage.transform import resize
 from tensorflow.keras.datasets import cifar10
 import cv2
 import os 
 import PIL.Image
 
 # scale an array of images to a new size
+
 def scale_images(images, new_shape):
 	images_list = list()
 	for image in images:
 		# resize with nearest neighbor interpolation
-		new_image = resize(image, new_shape, 0)
+		new_image = cv2.resize(image,(int(75),int(75)))
 		# store
 		images_list.append(new_image)
 	return asarray(images_list)
@@ -43,20 +44,24 @@ def calculate_fid(model, images1, images2):
 	fid = ssdiff + trace(sigma1 + sigma2 - 2.0 * covmean)
 	return fid
 
-path1 = r"../datasets/celeba"
-path2 = r"../generated_data/celeba_64"
+path1 = r"../datasets/shapes3d"
+path2 = r"../hologan-2.0/generated_data/shapes3d"
 
 images1 = []
 images2 = []
-for filename in os.listdir(path1):
-    if filename.endswith('.jpg'):
-      img = cv2.imread(path1+'/'+filename)
-      images1.append(img)
-
+count = 0
 for filename in os.listdir(path2):
     if filename.endswith('.jpg'):
       img = cv2.imread(path2+'/'+filename)
-      images2.append(img)
+      images1.append(img)
+
+for filename in os.listdir(path1):
+    if filename.endswith('.jpg'):
+        img = cv2.imread(path1+'/'+filename)
+        images2.append(img)
+        count = count + 1
+        if count > 9:
+          break
 
 images1 = numpy.array(images1)
 images2 = numpy.array(images2)
